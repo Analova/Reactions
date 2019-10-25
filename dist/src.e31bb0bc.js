@@ -27024,13 +27024,16 @@ var _v = _interopRequireDefault(require("uuid/v4"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //https://admin.pubnub.com/#/user/525943/account/525901/app/35323832/key/709602/
-var newMessage = function newMessage(text) {
+var newMessage = function newMessage(_ref) {
+  var text = _ref.text,
+      username = _ref.username;
   return {
     type: _types.NEW_MESSAGE,
     item: {
-      text: text,
+      id: (0, _v.default)(),
       timestamp: Date.now(),
-      id: (0, _v.default)()
+      text: text,
+      username: username
     }
   };
 };
@@ -27045,6 +27048,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
+
+var _reactRedux = require("react-redux");
 
 var _pubsub = require("../pubsub");
 
@@ -27101,7 +27106,13 @@ function (_Component) {
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "publishMessage", function () {
-      _this.context.pubsub.publish((0, _messages.newMessage)(_this.state.text));
+      var text = _this.state.text;
+      var username = _this.props.username;
+
+      _this.context.pubsub.publish((0, _messages.newMessage)({
+        text: text,
+        username: username
+      }));
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "handleKeyPress", function (e) {
@@ -27115,7 +27126,7 @@ function (_Component) {
     key: "render",
     value: function render() {
       console.log("this", this);
-      return _react.default.createElement("div", null, "Got something to say?", _react.default.createElement("input", {
+      return _react.default.createElement("div", null, _react.default.createElement("h2", null, " Got something to say?"), _react.default.createElement("input", {
         type: "text",
         onChange: this.updateText,
         onKeyPress: this.handleKeyPress
@@ -27131,9 +27142,15 @@ function (_Component) {
 
 _defineProperty(PublishMessage, "contextType", _pubsub.PubSubContext);
 
-var _default = PublishMessage;
+var _default = (0, _reactRedux.connect)(function (_ref) {
+  var username = _ref.username;
+  return {
+    username: username
+  };
+})(PublishMessage);
+
 exports.default = _default;
-},{"react":"../node_modules/react/index.js","../pubsub":"pubsub.js","../actions/messages":"actions/messages.js"}],"components/MessageBoard.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","react-redux":"../node_modules/react-redux/es/index.js","../pubsub":"pubsub.js","../actions/messages":"actions/messages.js"}],"components/MessageBoard.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27152,10 +27169,11 @@ var MessageBoard = function MessageBoard(_ref) {
   return _react.default.createElement("div", null, messages.items.map(function (msgItem) {
     var id = msgItem.id,
         text = msgItem.text,
-        timestamp = msgItem.timestamp;
+        timestamp = msgItem.timestamp,
+        username = msgItem.username;
     return _react.default.createElement("div", {
       key: id
-    }, _react.default.createElement("h4", null, new Date(timestamp).toLocaleDateString()), _react.default.createElement("p", null, text), _react.default.createElement("hr", null));
+    }, _react.default.createElement("h4", null, new Date(timestamp).toLocaleDateString()), _react.default.createElement("p", null, text), _react.default.createElement("h4", null, "-", username), _react.default.createElement("hr", null));
   }));
 };
 
@@ -27392,7 +27410,10 @@ pubsub.addListener({
   }
 });
 setTimeout(function () {
-  pubsub.publish((0, _messages.newMessage)("Hello world!"));
+  pubsub.publish((0, _messages.newMessage)({
+    text: "Hello world!",
+    username: "David"
+  }));
 }, 1000);
 
 _reactDom.default.render(_react.default.createElement(_reactRedux.Provider, {

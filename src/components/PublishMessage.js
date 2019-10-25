@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import { PubSubContext } from "../pubsub";
 import { newMessage } from "../actions/messages";
 
@@ -10,7 +11,10 @@ class PublishMessage extends Component {
   };
 
   publishMessage = () => {
-    this.context.pubsub.publish(newMessage(this.state.text));
+    const { text } = this.state;
+    const { username } = this.props;
+
+    this.context.pubsub.publish(newMessage({ text, username }));
   };
 
   handleKeyPress = e => {
@@ -21,7 +25,7 @@ class PublishMessage extends Component {
     console.log("this", this);
     return (
       <div>
-        Got something to say?
+        <h2> Got something to say?</h2>
         <input
           type="text"
           onChange={this.updateText}
@@ -36,4 +40,4 @@ class PublishMessage extends Component {
 
 //PublishMessage.contextType = PubSubContext;
 
-export default PublishMessage;
+export default connect(({ username }) => ({ username }))(PublishMessage);
